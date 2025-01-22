@@ -74,18 +74,18 @@ Please prepare an environment with python=3.9, and then use the command "pip ins
 
 Pretrained weights for the encoder can be downloaded at (https://drive.google.com/drive/folders/1odF_NK5wYRkE0C3w9eoLUQEVbxefj66e?usp=sharing).
 
-Checkponits for RWKV-UNet can be downloaded at (https://drive.google.com/drive/folders/19y_8Mzmw5u6Bg-iVfmh6-vRCBDdy149_?usp=sharing).
+Checkpoints for RWKV-UNet can be downloaded at (https://drive.google.com/drive/folders/19y_8Mzmw5u6Bg-iVfmh6-vRCBDdy149_?usp=sharing).
 
 
 ### 4. Train/Test
 
-- Run the train script on synapse dataset. The batch size can be reduced to 12 or 6 to save memory (please also decrease the base_lr linearly), and both can reach similar performance.
+- Run the training script on the Synapse dataset. The batch size can be reduced to 12 or 6 to save memory (please also decrease the base_lr linearly), and both can reach similar performance.
 
 ```bash
 python train.py --dataset Synapse --max_epochs 60 --base_lr 0.001 --img_size 224 --pretrained_path
 ```
 
-- Run the test script on synapse dataset.
+- Run the test script on the Synapse dataset.
 
 ```bash
 python test.py --dataset Synapse --max_epochs 60 --base_lr 0.001 --img_size 224
