@@ -1,0 +1,24 @@
+13:20:55.294] Namespace(volume_path='./data/Synapse/test_vol_h5', dataset='Synapse', num_classes=9, list_dir='./lists/lists_Synapse', max_iterations=20000, max_epochs=30, batch_size=24, img_size=224, is_savenii=False, test_save_dir='../predictions', deterministic=1, base_lr=0.001, seed=1234, Dataset=<class 'datasets.dataset_synapse.Synapse_dataset'>, z_spacing=1, is_pretrain=True, exp='rwkvSynapse224')
+[13:20:55.294] final_tiny_true_pretrain_bs24_lr0.001_224
+[13:20:55.294] 12 test iterations per epoch
+[13:23:35.851] idx 0 case case0008 mean_dice 0.662641 mean_hd95 13.123617
+[13:25:07.383] idx 1 case case0022 mean_dice 0.910198 mean_hd95 2.102391
+[13:26:51.319] idx 2 case case0038 mean_dice 0.788079 mean_hd95 7.525458
+[13:30:16.207] idx 3 case case0036 mean_dice 0.839571 mean_hd95 8.889025
+[13:32:54.258] idx 4 case case0032 mean_dice 0.901295 mean_hd95 6.707022
+[13:35:22.941] idx 5 case case0002 mean_dice 0.886448 mean_hd95 5.626859
+[13:37:05.361] idx 6 case case0029 mean_dice 0.784334 mean_hd95 24.584410
+[13:40:42.475] idx 7 case case0003 mean_dice 0.684964 mean_hd95 86.804635
+[13:43:22.377] idx 8 case case0001 mean_dice 0.810038 mean_hd95 22.380374
+[13:45:51.445] idx 9 case case0004 mean_dice 0.800538 mean_hd95 9.630898
+[13:47:19.281] idx 10 case case0025 mean_dice 0.860210 mean_hd95 23.410139
+[13:48:45.401] idx 11 case case0035 mean_dice 0.861224 mean_hd95 3.168937
+[13:48:45.465] Mean class 1 mean_dice 0.892793 mean_hd95 3.815122
+[13:48:45.466] Mean class 2 mean_dice 0.641783 mean_hd95 36.164988
+[13:48:45.466] Mean class 3 mean_dice 0.860250 mean_hd95 24.727416
+[13:48:45.466] Mean class 4 mean_dice 0.837606 mean_hd95 18.656513
+[13:48:45.466] Mean class 5 mean_dice 0.950941 mean_hd95 11.712532
+[13:48:45.466] Mean class 6 mean_dice 0.635037 mean_hd95 10.461217
+[13:48:45.466] Mean class 7 mean_dice 0.903556 mean_hd95 19.623707
+[13:48:45.466] Mean class 8 mean_dice 0.804393 mean_hd95 17.474349
+[13:48:45.466] Testing performance in best val model: mean_dice : 0.815795 mean_hd95 : 17.829480

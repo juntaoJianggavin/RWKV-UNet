@@ -1,0 +1,24 @@
+[16:36:05.889] Namespace(volume_path='./data/Synapse/test_vol_h5', dataset='Synapse', num_classes=9, list_dir='./lists/lists_Synapse', max_iterations=20000, max_epochs=30, batch_size=24, img_size=224, is_savenii=False, test_save_dir='../predictions', deterministic=1, base_lr=0.001, seed=1234, Dataset=<class 'datasets.dataset_synapse.Synapse_dataset'>, z_spacing=1, is_pretrain=True, exp='rwkvSynapse224')
+[16:36:05.890] final_small_true_pretrain_bs24_lr0.001_224
+[16:36:05.890] 12 test iterations per epoch
+[16:38:48.696] idx 0 case case0008 mean_dice 0.699436 mean_hd95 16.419147
+[16:40:21.510] idx 1 case case0022 mean_dice 0.919936 mean_hd95 1.728553
+[16:42:05.971] idx 2 case case0038 mean_dice 0.831939 mean_hd95 3.399391
+[16:45:33.255] idx 3 case case0036 mean_dice 0.844628 mean_hd95 22.330606
+[16:48:13.655] idx 4 case case0032 mean_dice 0.901840 mean_hd95 11.582053
+[16:50:42.998] idx 5 case case0002 mean_dice 0.882164 mean_hd95 6.046033
+[16:52:27.255] idx 6 case case0029 mean_dice 0.774219 mean_hd95 38.892075
+[16:56:09.338] idx 7 case case0003 mean_dice 0.645066 mean_hd95 95.965507
+[16:58:51.977] idx 8 case case0001 mean_dice 0.758252 mean_hd95 44.254558
+[17:01:22.912] idx 9 case case0004 mean_dice 0.824496 mean_hd95 8.308438
+[17:02:51.002] idx 10 case case0025 mean_dice 0.889377 mean_hd95 2.404508
+[17:04:17.989] idx 11 case case0035 mean_dice 0.892306 mean_hd95 2.621836
+[17:04:18.054] Mean class 1 mean_dice 0.893571 mean_hd95 3.781447
+[17:04:18.054] Mean class 2 mean_dice 0.676039 mean_hd95 35.599233
+[17:04:18.054] Mean class 3 mean_dice 0.841145 mean_hd95 26.107211
+[17:04:18.054] Mean class 4 mean_dice 0.792550 mean_hd95 39.632535
+[17:04:18.054] Mean class 5 mean_dice 0.956032 mean_hd95 18.279368
+[17:04:18.054] Mean class 6 mean_dice 0.688586 mean_hd95 10.591716
+[17:04:18.055] Mean class 7 mean_dice 0.915764 mean_hd95 15.388953
+[17:04:18.055] Mean class 8 mean_dice 0.812086 mean_hd95 19.921340
+[17:04:18.055] Testing performance in best val model: mean_dice : 0.821972 mean_hd95 : 21.162725
