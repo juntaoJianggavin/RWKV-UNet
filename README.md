@@ -1,5 +1,5 @@
 # RWKV-UNet
-Official Pytorch implementation of the paper [RWKV-UNet: Improving UNet with Long-Range Cooperation for Effective Medical Image Segmentation] ( https://arxiv.org/abs/2501.08458).  
+Official Pytorch implementation of the paper [RWKV-UNet: Improving UNet with Long-Range Cooperation for Effective Medical Image Segmentation](https://arxiv.org/abs/2501.08458).  
 
 ## Architecture
 
@@ -36,7 +36,7 @@ class="center">
 ## Usage
 ### 1. Prepare data
 
-Synapse (BTCV preprocessed data) and ACDC data are available at [TransUNet] (https://github.com/Beckschen/TransUNet/tree/main)'s repo. 
+Synapse (BTCV preprocessed data) and ACDC data are available at [TransUNet](https://github.com/Beckschen/TransUNet/tree/main)'s repo. 
 
 The directory structure of the whole project is as follows:
 
@@ -96,7 +96,7 @@ python test.py --dataset Synapse --max_epochs 60 --base_lr 0.001 --img_size 224
 python test.py --dataset Synapse --path_specific 'ckpts/Synapse_base.pth'
 ```
 ## Acknowledgements
-This code base uses certain code blocks and helper functions from [TransUNet] (https://github.com/Beckschen/TransUNet/tree/main) and [Vision-RWKV] (https://github.com/OpenGVLab/Vision-RWKV).
+This code base uses certain code blocks and helper functions from [TransUNet](https://github.com/Beckschen/TransUNet/tree/main) and [Vision-RWKV](https://github.com/OpenGVLab/Vision-RWKV).
 
 ## Citations
 
