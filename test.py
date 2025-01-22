@@ -15,7 +15,7 @@ try:
 except:
     pass
 from utils import test_single_volume
-from rwkv_unet import RWKV_UNet,CascadeUNet
+from rwkv_unet import RWKV_UNet
 import ttach as tta
 
 parser = argparse.ArgumentParser()
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         #tta.Rotate90(angles=[0, 90]), #for ACDC
     ]
 )
-    net.load_state_dict(torch.load(snapshot))
+    net.load_state_dict(torch.load(snapshot), strict=False)
     net = tta.SegmentationTTAWrapper(net, transforms)
     snapshot_name = snapshot_path.split('/')[-1]
 
