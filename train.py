@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
-from rwkv_unet import RWKV_UNet, CascadeUNet
+from rwkv_unet import RWKV_UNet
 from trainer import trainer_synapse, trainer_acdc
 
 parser = argparse.ArgumentParser()
