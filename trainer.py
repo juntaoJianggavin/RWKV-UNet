@@ -60,10 +60,6 @@ def trainer_acdc(args, model, snapshot_path):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            #lr_ = base_lr * (1.0 - iter_num / max_iterations) ** 0.9
-            #for param_group in optimizer.param_groups:
-                #param_group['lr'] = lr_
-
             iter_num = iter_num + 1
             writer.add_scalar('info/total_loss', loss, iter_num)
             writer.add_scalar('info/loss_ce', loss_ce, iter_num)
@@ -142,7 +138,6 @@ def trainer_synapse(args, model, snapshot_path):
     dice_loss = DiceLoss(num_classes)
     optimizer = optim.AdamW(model.parameters(), lr=base_lr, weight_decay=0.001)
     scheduler = CosineAnnealingLR(optimizer, T_max=args.max_epochs, eta_min=0)
-
     writer = SummaryWriter(snapshot_path + '/log')
     iter_num = 0
     max_epoch = args.max_epochs
@@ -161,9 +156,6 @@ def trainer_synapse(args, model, snapshot_path):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            for param_group in optimizer.param_groups:
-                param_group['lr'] = lr_
-
             iter_num = iter_num + 1
             writer.add_scalar('info/lr', lr_, iter_num)
             writer.add_scalar('info/total_loss', loss, iter_num)
