@@ -1,5 +1,5 @@
 # RWKV-UNet
-Official Pytorch implementation of the paper [RWKV-UNet: Improving UNet with Long-Range Cooperation for Effective Medical Image Segmentation](https://arxiv.org/abs/2501.08458).  
+Official PyTorch implementation of the paper [RWKV-UNet: Improving UNet with Long-Range Cooperation for Effective Medical Image Segmentation](https://arxiv.org/abs/2501.08458).  
 
 ## Architecture
 
