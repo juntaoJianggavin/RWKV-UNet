@@ -157,6 +157,7 @@ def trainer_synapse(args, model, snapshot_path):
             loss.backward()
             optimizer.step()
             iter_num = iter_num + 1
+            lr_= optimizer.param_groups[0]['lr']
             writer.add_scalar('info/lr', lr_, iter_num)
             writer.add_scalar('info/total_loss', loss, iter_num)
             writer.add_scalar('info/loss_ce', loss_ce, iter_num)
