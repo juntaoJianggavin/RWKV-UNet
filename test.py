@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     # name the same snapshot defined in train script!
     args.exp = 'rwkv' + dataset_name + str(args.img_size)
-    snapshot_path = "./models/{}/{}".format(args.exp, 'exp1')
+    snapshot_path = "./outputs/{}/{}".format(args.exp, 'exp1')
     snapshot_path = snapshot_path + '_pretrain' if args.is_pretrain else snapshot_path
     snapshot_path = snapshot_path + '_epo' + str(args.max_epochs) if args.max_epochs != 30 else snapshot_path
     snapshot_path = snapshot_path+'_bs'+str(args.batch_size)
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     snapshot_path = snapshot_path + '_s'+str(args.seed) if args.seed!=1234 else snapshot_path
     snapshot = os.path.join(snapshot_path, 'best_model.pth')
     if not os.path.exists(snapshot): snapshot = snapshot.replace('best_model', 'epoch_'+str(args.max_epochs-1))
-    if path_specific != None:
-            snapshot=path_specific
+    if args.path_specific != None:
+            snapshot=args.path_specific
     net = RWKV_UNet(in_channels=1, img_size=args.img_size, num_classes=args.num_classes,pretrained_path=None).cuda()
     transforms = tta.Compose(
     [
