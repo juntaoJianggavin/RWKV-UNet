@@ -79,7 +79,7 @@ Checkpoints for RWKV-UNet can be downloaded at (https://drive.google.com/drive/f
 
 ### 4. Train/Test
 
-- Run the training script on the Synapse dataset. The batch size can be reduced to 12 or 6 to save memory (please also decrease the base_lr linearly), and both can reach similar performance.
+- Run the training script on the Synapse dataset.
 
 ```bash
 python train.py --dataset Synapse --max_epochs 30 --base_lr 0.001 --img_size 224 --pretrained_path
