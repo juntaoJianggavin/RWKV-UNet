@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     if not os.path.exists(snapshot_path):
         os.makedirs(snapshot_path)
-    net = RWKV_UNet(in_channels=1, img_size=args.img_size, num_classes=args.num_classes,pretrained_path=pretrained_path)
+    net = RWKV_UNet(in_channels=1, img_size=args.img_size, num_classes=args.num_classes,pretrained_path=args.pretrained_path)
     if torch.cuda.device_count() > 1:
         print(f"Using {torch.cuda.device_count()} GPUs")
         net = nn.DataParallel(net)
