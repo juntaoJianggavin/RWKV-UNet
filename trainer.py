@@ -156,8 +156,10 @@ def trainer_synapse(args, model, snapshot_path):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            lr_ = base_lr * (1.0 - iter_num / max_iterations) ** 0.9
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = lr_
             iter_num = iter_num + 1
-            lr_= optimizer.param_groups[0]['lr']
             writer.add_scalar('info/lr', lr_, iter_num)
             writer.add_scalar('info/total_loss', loss, iter_num)
             writer.add_scalar('info/loss_ce', loss_ce, iter_num)
