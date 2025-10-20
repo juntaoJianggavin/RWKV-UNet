@@ -1,12 +1,3 @@
-import math
-from torch.utils.cpp_extension import load
-import torch
-import torch.nn as nn
-from torch.nn import functional as F
-from timm.layers import DropPath, create_act_layer,  LayerType
-import numpy as np
-import torchvision
-from typing import Callable, Dict, Optional, Type
 from einops import rearrange, reduce
 from timm.layers.activations import *
 from timm.layers import DropPath, trunc_normal_
@@ -16,16 +7,12 @@ from torch.utils.cpp_extension import load
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from timm.layers import DropPath, create_act_layer, LayerType
+from timm.layers import DropPath, create_act_layer,  LayerType
 import numpy as np
 import torchvision
 from typing import Callable, Dict, Optional, Type
 from ccm.ccm import CCMix
 import timm.layers.weight_init as weight_init
-
-inplace = True
-
-
 T_MAX = 1024
 inplace = True
 wkv_cuda = load(name="wkv", sources=["cuda/wkv_op.cpp", "cuda/wkv_cuda.cu"],
@@ -161,6 +148,7 @@ class VRWKV_SpatialMix(nn.Module):
     def __init__(self, n_embd, channel_gamma=1/4, shift_pixel=1):
         super().__init__()
         self.n_embd = n_embd
+        self.device = None
         attn_sz = n_embd
         self._init_weights()
         self.shift_pixel = shift_pixel
@@ -208,40 +196,15 @@ class VRWKV_SpatialMix(nn.Module):
 
     def forward(self, x, patch_resolution=None):
         B, T, C = x.size()
+        self.device = x.device
         sr, k, v = self.jit_func(x, patch_resolution)
         x = RUN_CUDA(B, T, C, self.spatial_decay / T, self.spatial_first / T, k, v)
         x = self.key_norm(x)
         x = sr * x
         x = self.output(x)
         return x
-    
-class UpBlock(nn.Module):
-    def __init__(self, dim_in, dim_out, norm_in=False, has_skip=False, exp_ratio=1.0, norm_layer='bn_2d',
-                 dw_ks=3, stride=1, dilation=1, se_ratio=0.0,drop_path=0., drop=0.):
-        super().__init__()
-        self.has_skip =has_skip
-        self.norm = get_norm(norm_layer)(dim_in) if norm_in else nn.Identity()
-        dim_mid = int(dim_in * exp_ratio)
-        self.ln1 = nn.LayerNorm(dim_mid)
-        self.conv = ConvNormAct(dim_in, dim_mid, kernel_size=1)
-        self.se = SE(dim_mid, rd_ratio=se_ratio, act_layer=get_act(act_layer)) if se_ratio > 0.0 else nn.Identity()
-        self.proj_drop = nn.Dropout(drop)
-        self.proj = ConvNormAct(dim_mid, dim_out, kernel_size=1, norm_layer='bn_2d', act_layer='relu', inplace=inplace)
-        self.drop_path = DropPath(drop_path) if drop_path else nn.Identity()
-        self.conv_local = ConvNormAct(dim_mid, dim_mid, kernel_size=dw_ks, stride=stride, dilation=dilation, groups=dim_mid, norm_layer='bn_2d', act_layer='silu', inplace=inplace)
-        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
-    def forward(self, x):
-        shortcut = x
-        x = self.norm(x)
-        x = self.conv(x)
-        x = x + self.se(self.conv_local(x)) if self.has_skip else self.se(self.conv_local(x))
-        x = self.proj(x)
-        #x = x + self.se(self.conv_local(x)) if self.has_skip else self.se(self.conv_local(x))
-        x = self.proj_drop(x)
-        x = self.upsample(x)
-        return x
 
-class iR_RWKV(nn.Module):
+class GLSP(nn.Module):
     def __init__(self, dim_in, dim_out, norm_in=True, has_skip=True, exp_ratio=1.0, norm_layer='bn_2d',
                  act_layer='relu', dw_ks=3, stride=1, dilation=1, se_ratio=0.0,
                  attn_s=True, drop_path=0., drop=0.,img_size=224, channel_gamma=1/4, shift_pixel=1):
@@ -249,16 +212,19 @@ class iR_RWKV(nn.Module):
         self.norm = get_norm(norm_layer)(dim_in) if norm_in else nn.Identity()
         dim_mid = int(dim_in * exp_ratio)
         self.ln1 = nn.LayerNorm(dim_mid)
+        self.ln2 = nn.LayerNorm(dim_mid)
         self.conv = ConvNormAct(dim_in, dim_mid, kernel_size=1)
         self.has_skip = (dim_in == dim_out and stride == 1) and has_skip
-        if attn_s==True:
-                self.att = VRWKV_SpatialMix(dim_mid, channel_gamma, shift_pixel)
+        self.att = VRWKV_SpatialMix(dim_mid, channel_gamma, shift_pixel)
         self.se = SE(dim_mid, rd_ratio=se_ratio, act_layer=get_act(act_layer)) if se_ratio > 0.0 else nn.Identity()
         self.proj_drop = nn.Dropout(drop)
         self.proj = ConvNormAct(dim_mid, dim_out, kernel_size=1, norm_layer='none', act_layer='none', inplace=inplace)
         self.drop_path = DropPath(drop_path) if drop_path else nn.Identity()
         self.attn_s=attn_s
+        # Set position embedding
         self.conv_local = ConvNormAct(dim_mid, dim_mid, kernel_size=dw_ks, stride=stride, dilation=dilation, groups=dim_mid, norm_layer='bn_2d', act_layer='silu', inplace=inplace)
+        self.drop_after_pos = nn.Dropout(p=0.1)
+        self.num_extra_tokens = 0
     def forward(self, x):
         shortcut = x
         x = self.norm(x)
@@ -267,7 +233,7 @@ class iR_RWKV(nn.Module):
             B, hidden, H, W = x.size()
             patch_resolution = (H,  W)
             x = x.view(B, hidden, -1)  # (B, hidden, H*W) = (B, C, N)
-            x = x.permute(0, 2, 1)
+            x = x.permute(0, 2, 1) 
             x = x + self.drop_path(self.ln1(self.att(x, patch_resolution)))
             B, n_patch, hidden = x.size()  # reshape from (B, n_patch, hidden) to (B, h, w, hidde
             h, w = int(np.sqrt(n_patch)), int(np.sqrt(n_patch))
@@ -281,105 +247,105 @@ class iR_RWKV(nn.Module):
 
 
 class RWKV_UNet_encoder(nn.Module):
-    def __init__(self, dim_in=3, num_classes=1000, img_size=224,
-                 depths=[2, 4, 4, 2], stem_dim=16, embed_dims=[64, 128, 256, 512], exp_ratios=[2., 2., 4., 4.],
-                 norm_layers=['bn_2d', 'bn_2d', 'bn_2d', 'bn_2d'], act_layers=['relu', 'relu', 'relu', 'relu'],
-                 dw_kss=[3, 3, 1, 1], se_ratios=[0.0, 0.0, 0.0, 0.0],attn_ss=[False, False, True, True],  drop=0., drop_path=0., channel_gamma=1/4, shift_pixel=1):
-        super().__init__()
-        self.num_classes = num_classes
-        assert num_classes > 0
-        dprs = [x.item() for x in torch.linspace(0, drop_path, sum(depths))]
-        self.stage0 = nn.ModuleList([
-            iR_RWKV(  # ds
-                dim_in, stem_dim, norm_in=False, has_skip=False, exp_ratio=1,
-                norm_layer=norm_layers[0], act_layer=act_layers[0], dw_ks=dw_kss[0],
-                stride=1, dilation=1, se_ratio=1, attn_s=False,
-                drop_path=0., drop=0.,img_size=img_size, shift_pixel=shift_pixel
-            )
-        ])
-        img_size=img_size//2
-        emb_dim_pre = stem_dim
-        for i in range(len(depths)):
-            layers = []
-            dpr = dprs[sum(depths[:i]):sum(depths[:i + 1])]
-            for j in range(depths[i]):
-                if j == 0:
-                    stride, has_skip, attn_s, exp_ratio = 2, False, False, exp_ratios[i] * 2
-                    img_size=img_size//2
-                else:
-                    stride, has_skip, attn_s, exp_ratio = 1, True, attn_ss[i], exp_ratios[i]
-                layers.append(iR_RWKV(
-                    emb_dim_pre, embed_dims[i], norm_in=True, has_skip=has_skip, exp_ratio=exp_ratio,
-                    norm_layer=norm_layers[i], act_layer=act_layers[i],  dw_ks=dw_kss[i],
-                    stride=stride, dilation=1, se_ratio=se_ratios[i],attn_s=attn_s,
-                    drop_path=dpr[j],drop=drop,img_size=img_size, shift_pixel=shift_pixel))
-                emb_dim_pre = embed_dims[i]
-            self.__setattr__(f'stage{i + 1}', nn.ModuleList(layers))
-        self.pre_dim = embed_dims[-1]
-        self.norm = get_norm(norm_layers[-1])(embed_dims[-1])
-        self.head = nn.Linear(self.pre_dim, num_classes)
-        self.apply(self._init_weights)
-
-    def _init_weights(self, m):
-        if isinstance(m, nn.Linear):
-            trunc_normal_(m.weight, std=.02)
-            if m.bias is not None:
-                nn.init.zeros_(m.bias)
-        elif isinstance(m, (nn.LayerNorm, nn.GroupNorm,
-                            nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d,
-                            nn.InstanceNorm1d, nn.InstanceNorm2d, nn.InstanceNorm3d)):
-            nn.init.zeros_(m.bias)
-            nn.init.ones_(m.weight)
-
-    @torch.jit.ignore
-    def no_weight_decay(self):
-        return {'token'}
-
-    @torch.jit.ignore
-    def no_weight_decay_keywords(self):
-        return {'alpha', 'gamma', 'beta'}
-
-    @torch.jit.ignore
-    def no_ft_keywords(self):
-        # return {'head.weight', 'head.bias'}
-        return {}
-
-    @torch.jit.ignore
-    def ft_head_keywords(self):
-        return {'head.weight', 'head.bias'}, self.num_classes
-
-    def get_classifier(self):
-        return self.head
-
-    def reset_classifier(self, num_classes):
-        self.num_classes = num_classes
-        self.head = nn.Linear(self.pre_dim, num_classes) if num_classes > 0 else nn.Identity()
-
-    def check_bn(self):
-        for name, m in self.named_modules():
-            if isinstance(m, nn.modules.batchnorm._NormBase):
-                m.running_mean = torch.nan_to_num(m.running_mean, nan=0, posinf=1, neginf=-1)
-                m.running_var = torch.nan_to_num(m.running_var, nan=0, posinf=1, neginf=-1)
-
-    def forward_features(self, x):
-        for blk in self.stage0:
-            x = blk(x)
-        for blk in self.stage1:
-            x = blk(x)
-        for blk in self.stage2:
-            x = blk(x)
-        for blk in self.stage3:
-            x = blk(x)
-        for blk in self.stage4:
-            x = blk(x)
-        return x
-
-    def forward(self, x):
-        x = self.forward_features(x)
-        x = self.norm(x)
-        x = reduce(x, 'b c h w -> b c', 'mean').contiguous()
-        x = self.head(x)
-        return {'out': x, 'out_kd': x}
+	def __init__(self, dim_in=3, num_classes=1000, img_size=224,
+				 depths=[2, 4, 4, 2], stem_dim=16, embed_dims=[64, 128, 256, 512], exp_ratios=[2., 2., 4., 4.],
+				 norm_layers=['bn_2d', 'bn_2d', 'bn_2d', 'bn_2d'], act_layers=['relu', 'relu', 'relu', 'relu'],
+				 dw_kss=[3, 3, 1, 1], se_ratios=[0.0, 0.0, 0.0, 0.0],attn_ss=[False, False, True, True],  drop=0., drop_path=0., pre_dim=0, channel_gamma=1/4, shift_pixel=1):
+		super().__init__()
+		self.num_classes = num_classes
+		assert num_classes > 0
+		dprs = [x.item() for x in torch.linspace(0, drop_path, sum(depths))]
+		self.embed_dims=embed_dims
+		self.stage0 = nn.ModuleList([
+			GLSP(  # ds
+				dim_in, stem_dim, norm_in=False, has_skip=False, exp_ratio=1,
+				norm_layer=norm_layers[0], act_layer=act_layers[0], dw_ks=dw_kss[0],
+				stride=1, dilation=1, se_ratio=1, attn_s=False,
+				drop_path=0., drop=0.,img_size=224
+			)
+		])
+		img_size=img_size//2
+		emb_dim_pre = stem_dim
+		for i in range(len(depths)):
+			layers = []
+			dpr = dprs[sum(depths[:i]):sum(depths[:i + 1])]
+			for j in range(depths[i]):
+				if j == 0:
+					stride, has_skip, attn_s, exp_ratio = 2, False, False, exp_ratios[i] * 2
+					img_size=img_size//2
+				else:
+					stride, has_skip, attn_s, exp_ratio = 1, True, attn_ss[i], exp_ratios[i]                         
+				layers.append(GLSP(
+					emb_dim_pre, embed_dims[i], norm_in=True, has_skip=has_skip, exp_ratio=exp_ratio,
+					norm_layer=norm_layers[i], act_layer=act_layers[i],  dw_ks=dw_kss[i],
+					stride=stride, dilation=1, se_ratio=se_ratios[i],attn_s=attn_s,
+					drop_path=dpr[j],drop=drop,img_size=img_size))
+				emb_dim_pre = embed_dims[i]
+				if j == 0 & i>1:
+					patch_size=patch_size//2
+			self.__setattr__(f'stage{i + 1}', nn.ModuleList(layers))
+		self.pre_dim = embed_dims[-1]
+		self.norm = get_norm(norm_layers[-1])(embed_dims[-1])
+		self.head = nn.Linear(self.pre_dim, num_classes)
+		self.apply(self._init_weights)
+	
+	def _init_weights(self, m):
+		if isinstance(m, nn.Linear):
+			trunc_normal_(m.weight, std=.02)
+			if m.bias is not None:
+				nn.init.zeros_(m.bias)
+		elif isinstance(m, (nn.LayerNorm, nn.GroupNorm,
+							nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d,
+							nn.InstanceNorm1d, nn.InstanceNorm2d, nn.InstanceNorm3d)):
+			nn.init.zeros_(m.bias)
+			nn.init.ones_(m.weight)
+	
+	@torch.jit.ignore
+	def no_weight_decay(self):
+		return {'token'}
+	
+	@torch.jit.ignore
+	def no_weight_decay_keywords(self):
+		return {'alpha', 'gamma', 'beta'}
+	
+	@torch.jit.ignore
+	def no_ft_keywords(self):
+		# return {'head.weight', 'head.bias'}
+		return {}
+	
+	@torch.jit.ignore
+	def ft_head_keywords(self):
+		return {'head.weight', 'head.bias'}, self.num_classes
+	
+	def get_classifier(self):
+		return self.head
+	
+	def reset_classifier(self, num_classes):
+		self.num_classes = num_classes
+		self.head = nn.Linear(self.pre_dim, num_classes) if num_classes > 0 else nn.Identity()
+	
+	def check_bn(self):
+		for name, m in self.named_modules():
+			if isinstance(m, nn.modules.batchnorm._NormBase):
+				m.running_mean = torch.nan_to_num(m.running_mean, nan=0, posinf=1, neginf=-1)
+				m.running_var = torch.nan_to_num(m.running_var, nan=0, posinf=1, neginf=-1)
+	
+	def forward_features(self, x):
+		for blk in self.stage0:
+			x = blk(x)
+		for blk in self.stage1:
+			x = blk(x)
+		for blk in self.stage2:
+			x = blk(x)
+		for blk in self.stage3:
+			x = blk(x)
+		for blk in self.stage4:
+			x = blk(x)
+		return x
+	
+	def forward(self, x):
+		x = self.forward_features(x)
+		return x
 
 
 def RWKV_UNet_encoder_T(pretrained=False, **kwargs):
@@ -401,11 +367,37 @@ def RWKV_UNet_encoder_B(pretrained=False, **kwargs):
         # dim_in=3, num_classes=1000, img_size=224,
         depths=[3, 3, 6, 3], stem_dim=24, embed_dims=[48, 72, 144, 240], exp_ratios=[2., 2.5, 4.0, 4.0],norm_layers=['bn_2d', 'bn_2d', 'ln_2d', 'ln_2d'], act_layers=['silu', 'silu', 'gelu', 'gelu'], dw_kss=[5, 5, 5, 5], attn_ss=[False, False, True, True],drop=0., drop_path=0.05,**kwargs)
     return model
+class UpBlock(nn.Module):
+    def __init__(self, dim_in, dim_out, norm_in=False, has_skip=False, exp_ratio=1.0, norm_layer='bn_2d',
+                 dw_ks=3, stride=1, dilation=1, se_ratio=0.0,drop_path=0., drop=0.):
+        super().__init__()
+        self.has_skip =has_skip
+        self.norm = get_norm(norm_layer)(dim_in) if norm_in else nn.Identity()
+        dim_mid = int(dim_in * exp_ratio)
+        self.ln1 = nn.LayerNorm(dim_mid)
+        self.conv = ConvNormAct(dim_in, dim_mid, kernel_size=1)
+        self.se = SE(dim_mid, rd_ratio=se_ratio, act_layer=get_act(act_layer)) if se_ratio > 0.0 else nn.Identity()
+        self.proj_drop = nn.Dropout(drop)
+        self.proj = ConvNormAct(dim_mid, dim_out, kernel_size=1, norm_layer='bn_2d', act_layer='relu', inplace=inplace)
+        self.drop_path = DropPath(drop_path) if drop_path else nn.Identity()
+        self.conv_local = ConvNormAct(dim_mid, dim_mid, kernel_size=dw_ks, stride=stride, dilation=dilation, groups=dim_mid, norm_layer='bn_2d', act_layer='silu', inplace=inplace)
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
+    def forward(self, x):
+        shortcut = x
+        x = self.norm(x)
+        x = self.conv(x)
+        x = x + self.se(self.conv_local(x)) if self.has_skip else self.se(self.conv_local(x))
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        x = self.upsample(x)
+        return x
+
+
 
 
 
 class RWKV_UNet(nn.Module):
-    def __init__(self, in_channels=1, num_classes=1, img_size=224, pretrained_path='net_B.pth'):
+    def __init__(self, in_channels=1, num_classes=9, img_size=224, pretrained_path='net_B.pth'):
         super(RWKV_UNet, self).__init__()
         self.encoder = RWKV_UNet_encoder_B(img_size=img_size)
         if pretrained_path:
@@ -451,7 +443,7 @@ class RWKV_UNet(nn.Module):
         return out
 
 class RWKV_UNet_S(nn.Module):
-    def __init__(self, in_channels=1, num_classes=1, img_size=224, pretrained_path='net_S.pth'):
+    def __init__(self, in_channels=1, num_classes=9, img_size=224, pretrained_path='net_S.pth'):
         super(RWKV_UNet_S, self).__init__()
         self.encoder = RWKV_UNet_encoder_S(img_size=img_size)
         if pretrained_path:
@@ -496,7 +488,7 @@ class RWKV_UNet_S(nn.Module):
         return out
 
 class RWKV_UNet_T(nn.Module):
-    def __init__(self, in_channels=1, num_classes=1, img_size=224, pretrained_path='net_T.pth'):
+    def __init__(self, in_channels=1, num_classes=1, img_size=256, pretrained_path='net_T.pth'):
         super(RWKV_UNet_T, self).__init__()
         self.encoder = RWKV_UNet_encoder_T(img_size=img_size)
         if pretrained_path:
@@ -516,7 +508,7 @@ class RWKV_UNet_T(nn.Module):
     def forward(self, x):
         # Encoder path
         input=x
-        x = x.repeat(1, 3, 1, 1)
+       # x = x.repeat(1, 3, 1, 1)
         for blk in self.encoder.stage0:
             x = blk(x)
         enc0 = x
