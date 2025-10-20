@@ -117,14 +117,7 @@ if __name__ == "__main__":
     if args.path_specific != None:
             snapshot=args.path_specific
     net = RWKV_UNet(in_channels=1, img_size=args.img_size, num_classes=args.num_classes,pretrained_path=None).cuda()
-    transforms = tta.Compose(
-    [
-        tta.HorizontalFlip(), 
-        #tta.Rotate90(angles=[0, 90]), #for ACDC
-    ]
-)
     net.load_state_dict(torch.load(snapshot), strict=False)
-    net = tta.SegmentationTTAWrapper(net, transforms)
     snapshot_name = snapshot_path.split('/')[-1]
 
     log_folder = './test_log/test_log_' + args.exp
