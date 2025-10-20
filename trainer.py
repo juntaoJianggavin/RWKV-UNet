@@ -35,8 +35,8 @@ def trainer_acdc(args, model, snapshot_path):
     valloader = DataLoader(db_val, batch_size=1, shuffle=False,
                            num_workers=1)
     model.train()
-    optimizer = optim.AdamW(model.parameters(), lr=base_lr,weight_decay=0.0001)
-    scheduler = CosineAnnealingLR(optimizer, T_max=args.max_epochs, eta_min=0)
+    optimizer = optim.AdamW(model.parameters(), lr=base_lr,weight_decay=0.00015)
+    scheduler = CosineAnnealingLR(optimizer, T_max=3*args.max_epochs//4, eta_min=0.000001)
     ce_loss = CrossEntropyLoss(ignore_index=4)
     dice_loss = DiceLoss(num_classes)
 
@@ -45,8 +45,8 @@ def trainer_acdc(args, model, snapshot_path):
     logging.info("{} val iterations per epoch".format(len(valloader)))
 
     iter_num = 0
-    max_epoch = args.max_epochs
     best_performance = 0.0
+    max_epoch = args.max_epochs
     iterator = tqdm(range(max_epoch), ncols=70)
     for epoch_num in iterator:
         for i_batch, sampled_batch in enumerate(trainloader):
@@ -55,8 +55,7 @@ def trainer_acdc(args, model, snapshot_path):
             outputs = model(volume_batch)
             loss_ce = ce_loss(outputs, label_batch[:].long())
             loss_dice = dice_loss(outputs, label_batch, softmax=True)
-            loss = 0.3 * loss_ce + 0.7 * loss_dice
-            
+            loss = 0.2 * loss_ce + 0.8 * loss_dice
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -65,7 +64,6 @@ def trainer_acdc(args, model, snapshot_path):
             writer.add_scalar('info/loss_ce', loss_ce, iter_num)
 
             logging.info('iteration %d : loss : %f, loss_ce: %f' % (iter_num, loss.item(), loss_ce.item()))
-            scheduler.step()
             if iter_num % 20 == 0:
                 image = volume_batch[1, 0:1, :, :]
                 image = (image - image.min()) / (image.max() - image.min())
@@ -107,7 +105,7 @@ def trainer_acdc(args, model, snapshot_path):
 
                 logging.info('iteration %d : mean_dice : %f mean_hd95 : %f' % (iter_num, performance, mean_hd95))
                 model.train()
-
+            scheduler.step()
             if iter_num >= max_iterations:
                 break
 
