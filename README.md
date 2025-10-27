@@ -103,7 +103,7 @@ This code base uses certain code blocks and helper functions from [TransUNet](ht
 ``` 
 @misc{jiang2025rwkvunetimprovingunetlongrange,
       title={RWKV-UNet: Improving UNet with Long-Range Cooperation for Effective Medical Image Segmentation}, 
-      author={Juntao Jiang and Jiangning Zhang and Weixuan Liu and Muxuan Gao and Xiaobin Hu and Xiaoxiao Yan and Feiyue Huang and Yong Liu},
+      author={Juntao Jiang and Jiangning Zhang and Weixuan Liu and Muxuan Gao and Xiaobin Hu and Zhucun Xue and Yong Liu and Shuicheng Yan},
       year={2025},
       eprint={2501.08458},
       archivePrefix={arXiv},
