@@ -4,7 +4,7 @@ Official PyTorch implementation of the paper [RWKV-UNet: Improving UNet with Lon
 ## Architecture
 
 <p align="center">
-<img src="figs/main.jpeg" width=80% height=80% 
+<img src="figs/main.png" width=80% height=80% 
 class="center">
 </p>
 
