@@ -31,7 +31,7 @@ class="center">
 ## Qualitative Results
 
 <p align="center">
-<img src="figs/qualitative_results_synapse.jpeg" width=80% height=80% 
+<img src="figs/visulization.png" width=80% height=80% 
 class="center">
 </p>
 
