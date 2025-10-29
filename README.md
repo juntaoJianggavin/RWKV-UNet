@@ -18,7 +18,10 @@ class="center">
 <img src="figs/ACDC.png" width=40% height=40% 
 class="center">
 </p>
-
+<p align="center">
+<img src="figs/addition.png" width=40% height=40% 
+class="center">
+</p>
 <p align="center">
 <img src="figs/binary.png" width=80% height=80% 
 class="center">
