@@ -9,8 +9,8 @@ seaborn
 SimpleITK
 tensorboard
 timm
-torch==1.11.0a0+gitbc2c6ed
-torchsummary
-torchvision==0.12.0a0+9b5a3fe
+torch==2.0.0+cu118
+torchsummary==1.5.1
+torchvision==0.15.1+cu118
 tqdm
-ttach
+MedPy
