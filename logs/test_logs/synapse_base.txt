@@ -1,0 +1,24 @@
+[20:05:31.476] Namespace(Dataset=<class 'datasets.dataset_synapse.Synapse_dataset'>, base_lr=0.001, batch_size=24, dataset='Synapse', deterministic=1, exp='rwkvSynapse224', img_size=224, is_pretrain=True, is_savenii=True, list_dir='./lists/lists_Synapse', max_epochs=30, max_iterations=20000, num_classes=9, path_specific=None, seed=1234, test_save_dir='../predictions', volume_path='./data/Synapse/test_vol_h5', z_spacing=1)
+[20:05:31.477] basekernel9_pretrain_bs24_lr0.001_224
+[20:05:31.478] 12 test iterations per epoch
+[20:08:24.446] idx 0 case case0008 mean_dice 0.711294 mean_hd95 17.141893
+[20:10:05.832] idx 1 case case0022 mean_dice 0.911026 mean_hd95 3.074986
+[20:12:04.098] idx 2 case case0038 mean_dice 0.842660 mean_hd95 4.323580
+[20:16:33.931] idx 3 case case0036 mean_dice 0.848796 mean_hd95 5.767240
+[20:19:33.240] idx 4 case case0032 mean_dice 0.910406 mean_hd95 4.010099
+[20:22:15.319] idx 5 case case0002 mean_dice 0.889489 mean_hd95 6.423405
+[20:24:07.474] idx 6 case case0029 mean_dice 0.838670 mean_hd95 5.855872
+[20:28:17.192] idx 7 case case0003 mean_dice 0.795814 mean_hd95 33.752979
+[20:31:13.825] idx 8 case case0001 mean_dice 0.785944 mean_hd95 14.707001
+[20:33:59.399] idx 9 case case0004 mean_dice 0.782079 mean_hd95 7.110773
+[20:35:40.533] idx 10 case case0025 mean_dice 0.904672 mean_hd95 1.718757
+[20:37:17.080] idx 11 case case0035 mean_dice 0.894151 mean_hd95 2.348894
+[20:37:17.151] Mean class 1 mean_dice 0.887084 mean_hd95 4.394606
+[20:37:17.151] Mean class 2 mean_dice 0.703851 mean_hd95 9.291974
+[20:37:17.151] Mean class 3 mean_dice 0.895789 mean_hd95 10.998033
+[20:37:17.151] Mean class 4 mean_dice 0.843558 mean_hd95 7.947915
+[20:37:17.151] Mean class 5 mean_dice 0.957028 mean_hd95 5.745227
+[20:37:17.151] Mean class 6 mean_dice 0.665751 mean_hd95 10.976867
+[20:37:17.151] Mean class 7 mean_dice 0.935410 mean_hd95 7.546111
+[20:37:17.151] Mean class 8 mean_dice 0.854862 mean_hd95 13.922920
+[20:37:17.151] Testing performance in best val model: mean_dice : 0.842917 mean_hd95 : 8.852956
