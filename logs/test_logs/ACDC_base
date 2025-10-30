@@ -1,0 +1,47 @@
+[14:26:44.108] Namespace(Dataset=<class 'datasets.dataset_acdc.BaseDataSets'>, base_lr=0.001, batch_size=24, dataset='ACDC', deterministic=1, exp='vigunetACDC224', img_size=224, is_pretrain=True, is_savenii=False, list_dir=None, max_epochs=30, max_iterations=20000, num_classes=4, path_specific='new/outputs/rwkvACDC224/base2_pretrain_epo150_bs24_lr0.0005_224/best_model.pth', seed=1234, test_save_dir='../predictions', volume_path='./data/ACDC', z_spacing=5)
+[14:26:44.109] hybrid_decoder_pretrain_bs24_lr0.001_224
+[14:26:44.117] 40 test iterations per epoch
+[14:26:45.611] idx 0 case patient001_frame01 mean_dice 0.909525 mean_hd95 1.138071
+[14:26:46.304] idx 1 case patient001_frame12 mean_dice 0.913571 mean_hd95 1.138071
+[14:26:47.052] idx 2 case patient002_frame01 mean_dice 0.926691 mean_hd95 1.000000
+[14:26:47.786] idx 3 case patient002_frame12 mean_dice 0.894015 mean_hd95 1.000000
+[14:26:48.638] idx 4 case patient003_frame01 mean_dice 0.938473 mean_hd95 1.000000
+[14:26:49.476] idx 5 case patient003_frame15 mean_dice 0.944976 mean_hd95 1.000000
+[14:26:50.303] idx 6 case patient004_frame01 mean_dice 0.936034 mean_hd95 1.000000
+[14:26:51.123] idx 7 case patient004_frame15 mean_dice 0.930910 mean_hd95 1.000000
+[14:26:51.931] idx 8 case patient005_frame01 mean_dice 0.939263 mean_hd95 1.000000
+[14:26:52.751] idx 9 case patient005_frame13 mean_dice 0.904519 mean_hd95 1.138071
+[14:26:53.613] idx 10 case patient006_frame01 mean_dice 0.901906 mean_hd95 1.138071
+[14:26:54.421] idx 11 case patient006_frame16 mean_dice 0.855309 mean_hd95 1.412023
+[14:26:55.103] idx 12 case patient007_frame01 mean_dice 0.949313 mean_hd95 1.000000
+[14:26:55.844] idx 13 case patient007_frame07 mean_dice 0.934682 mean_hd95 1.000000
+[14:26:56.573] idx 14 case patient008_frame01 mean_dice 0.937805 mean_hd95 1.000000
+[14:26:57.295] idx 15 case patient008_frame13 mean_dice 0.908796 mean_hd95 1.138071
+[14:26:58.049] idx 16 case patient009_frame01 mean_dice 0.915021 mean_hd95 14.030381
+[14:26:58.792] idx 17 case patient009_frame13 mean_dice 0.919333 mean_hd95 1.138071
+[14:26:59.557] idx 18 case patient010_frame01 mean_dice 0.935694 mean_hd95 1.000000
+[14:27:00.322] idx 19 case patient010_frame13 mean_dice 0.934660 mean_hd95 1.000000
+[14:27:01.024] idx 20 case patient011_frame01 mean_dice 0.932349 mean_hd95 1.000000
+[14:27:01.711] idx 21 case patient011_frame08 mean_dice 0.922644 mean_hd95 1.000000
+[14:27:02.402] idx 22 case patient012_frame01 mean_dice 0.925370 mean_hd95 1.000000
+[14:27:03.088] idx 23 case patient012_frame13 mean_dice 0.825454 mean_hd95 1.666667
+[14:27:03.863] idx 24 case patient013_frame01 mean_dice 0.939399 mean_hd95 1.000000
+[14:27:04.627] idx 25 case patient013_frame14 mean_dice 0.928724 mean_hd95 1.000000
+[14:27:05.461] idx 26 case patient014_frame01 mean_dice 0.909631 mean_hd95 1.000000
+[14:27:06.283] idx 27 case patient014_frame13 mean_dice 0.937090 mean_hd95 1.000000
+[14:27:07.006] idx 28 case patient015_frame01 mean_dice 0.943061 mean_hd95 1.000000
+[14:27:07.713] idx 29 case patient015_frame10 mean_dice 0.889499 mean_hd95 1.000000
+[14:27:08.468] idx 30 case patient016_frame01 mean_dice 0.925553 mean_hd95 1.000000
+[14:27:09.222] idx 31 case patient016_frame12 mean_dice 0.916863 mean_hd95 1.138071
+[14:27:09.911] idx 32 case patient017_frame01 mean_dice 0.914874 mean_hd95 1.000000
+[14:27:10.623] idx 33 case patient017_frame09 mean_dice 0.934329 mean_hd95 1.000000
+[14:27:11.259] idx 34 case patient018_frame01 mean_dice 0.930002 mean_hd95 1.000000
+[14:27:11.898] idx 35 case patient018_frame10 mean_dice 0.931102 mean_hd95 1.000000
+[14:27:12.776] idx 36 case patient019_frame01 mean_dice 0.954574 mean_hd95 1.000000
+[14:27:13.640] idx 37 case patient019_frame11 mean_dice 0.950978 mean_hd95 1.000000
+[14:27:14.247] idx 38 case patient020_frame01 mean_dice 0.940946 mean_hd95 1.000000
+[14:27:14.843] idx 39 case patient020_frame11 mean_dice 0.932762 mean_hd95 1.000000
+[14:27:14.886] Mean class 1 mean_dice 0.912580 mean_hd95 2.120312
+[14:27:14.887] Mean class 2 mean_dice 0.887808 mean_hd95 1.010355
+[14:27:14.887] Mean class 3 mean_dice 0.968290 mean_hd95 1.000000
+[14:27:14.887] Testing performance in best val model: mean_dice : 0.922892 mean_hd95 : 1.376889
