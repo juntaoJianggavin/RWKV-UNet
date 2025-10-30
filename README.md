@@ -85,7 +85,7 @@ Checkpoints for RWKV-UNet can be downloaded at (https://drive.google.com/drive/f
 - Run the training script on the Synapse dataset.
 
 ```bash
-python train.py --dataset Synapse --max_epochs 30 --base_lr 0.001 --img_size 224 --pretrained_path
+python train.py --dataset Synapse --max_epochs 30 --base_lr 0.001 --img_size 224 --pretrained_path netB.pth
 ```
 
 - Run the test script on the Synapse dataset.
@@ -96,7 +96,7 @@ python test.py --dataset Synapse --max_epochs 30 --base_lr 0.001 --img_size 224
 - You can also specify the weights for inference by yourself.
 
 ```bash
-python test.py --dataset Synapse --path_specific 'ckpts/Synapse_base.pth'
+python test.py --dataset Synapse --path_specific ckpts/Synapse_base.pth
 ```
 ## Acknowledgements
 This code base uses certain code blocks and helper functions from [TransUNet](https://github.com/Beckschen/TransUNet/tree/main) and [Vision-RWKV](https://github.com/OpenGVLab/Vision-RWKV).
